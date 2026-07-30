@@ -1,0 +1,12 @@
+{
+  "name": "dingtalk-reminder-manager",
+  "version": "0.6.0",
+  "private": true,
+  "description": "DingDone 本地钉钉定时提醒管理器",
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "node --test --test-isolation=none app/test/*.test.js",
+    "verify:source": "node tools/verify-source.js",
+    "release:check": "npm test && npm run verify:source"
+  }
+}

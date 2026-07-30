@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>DingDone｜Wen's Ding</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="返回提醒总览">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M10.5 21.5h11M12 21.5v-7.2a4 4 0 0 1 8 0v7.2M14 24a2.2 2.2 0 0 0 4 0"/><path class="brand-spark" d="M23.5 8.5h3M25 7v3"/></svg>
+        </span>
+        <span>
+          <strong>DingDone</strong>
+          <small>本地运行 · 数据只在你的电脑</small>
+        </span>
+      </a>
+      <nav class="top-actions" aria-label="主要操作">
+        <div class="version-summary" aria-label="当前程序版本">
+          <span>当前版本</span><strong id="topCurrentVersion">读取中…</strong>
+        </div>
+        <button class="button button-update is-hidden" id="updateButton" type="button">新版 <span id="topLatestVersion"></span></button>
+        <button class="button button-primary" id="manageRobotsButton" type="button">
+          <span class="label-wide">机器人管理</span><span class="label-compact">机器人</span> <span class="count-badge" id="robotCountBadge">2</span>
+        </button>
+      </nav>
+    </header>
+
+    <div class="page-shell">
+      <aside class="sidebar" aria-label="页面导航">
+        <nav class="side-nav">
+          <a class="side-nav-item is-active" href="#remindersSection" data-nav-target="remindersSection"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.8 1.8"/></svg></span><span>全部提醒</span></a>
+          <a class="side-nav-item" href="#contentPoolsSection" data-nav-target="contentPoolsSection"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7.5h14M5 12h14M5 16.5h9"/><circle cx="18" cy="16.5" r="1"/></svg></span><span>内容与预览</span></a>
+          <a class="side-nav-item" href="#operationsSection" data-nav-target="operationsSection"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6.5 12 3.2 3.2 7.8-8"/><circle cx="12" cy="12" r="9"/></svg></span><span>运行检查</span></a>
+          <a class="side-nav-item" href="#historySection" data-nav-target="historySection"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 18.5h14M7 15l3-3 2.5 2.2L17 8.5"/><path d="M14 8.5h3v3"/></svg></span><span>发送记录</span></a>
+          <button class="side-nav-item" id="sideGuideButton" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 5.5h5.2A2.3 2.3 0 0 1 13 7.8v10.7a2.8 2.8 0 0 0-2.3-1.2H5.5z"/><path d="M18.5 5.5h-3.2A2.3 2.3 0 0 0 13 7.8v10.7a2.8 2.8 0 0 1 2.3-1.2h3.2z"/></svg></span><span>使用指南</span></button>
+          <button class="side-nav-item" id="handoverButton" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5h12M14 5.5l3 3-3 3M19 15.5H7M10 12.5l-3 3 3 3"/></svg></span><span>交接 / 导入导出</span></button>
+          <button class="side-nav-item" id="sideSettingsButton" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/></svg></span><span>发送安全</span></button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-notice" id="safetyBanner" role="status">
+            本地保存已启用，真实发送当前关闭
+          </div>
+          <div class="sidebar-service"><span>服务状态</span><strong><i></i><span id="sidebarServiceState">连接中</span></strong></div>
+          <div class="sidebar-signature" aria-label="Wen's Ding"><strong>Wen's Ding</strong></div>
+        </div>
+      </aside>
+
+      <main>
+      <section class="hero" id="overview">
+        <div>
+          <p class="eyebrow">今日状态</p>
+          <h1>提醒工作台</h1>
+          <p class="hero-copy">页面关闭后，后台仍会按已启用的规则运行。</p>
+        </div>
+        <div class="system-state">
+          <span class="status-dot"></span>
+          <span><strong id="systemStateTitle">正在连接本地后台</strong><small id="systemStateDetail">请稍候…</small></span>
+          <button class="status-action" id="toggleSendingButton" type="button" disabled>启用真实发送</button>
+        </div>
+      </section>
+
+      <section class="metrics" aria-label="提醒状态统计">
+        <article class="metric-card accent-blue">
+          <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17h10M8.5 17v-6a3.5 3.5 0 0 1 7 0v6M10 20h4"/></svg></span>
+          <span class="metric-label">启用中的提醒</span>
+          <strong id="activeMetric">0</strong>
+          <small id="activeMetricDetail">尚未添加提醒</small>
+        </article>
+        <article class="metric-card accent-orange">
+          <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg></span>
+          <span class="metric-label">今天待发送</span>
+          <strong id="todayMetric">0</strong>
+          <small id="todayMetricDetail">今天暂无任务</small>
+        </article>
+        <article class="metric-card accent-green">
+          <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6.5 15 4-4 3 2.5L18 8"/><path d="M14.5 8H18v3.5"/></svg></span>
+          <span class="metric-label">最近 7 天成功</span>
+          <strong id="successMetric">0</strong>
+          <small id="successMetricDetail">尚无发送记录</small>
+        </article>
+        <article class="metric-card accent-gray">
+          <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10 9v6M14 9v6"/></svg></span>
+          <span class="metric-label">暂停 / 已完成</span>
+          <strong id="inactiveMetric">0</strong>
+          <small>可以随时重新启用</small>
+        </article>
+      </section>
+
+      <section class="panel reminder-panel" id="remindersSection">
+        <div class="panel-heading">
+          <div>
+            <h2>全部提醒</h2>
+            <p>这里显示本工具创建的提醒，可随时暂停、编辑或查看发送结果。</p>
+          </div>
+          <div class="reminder-heading-actions">
+            <div class="filter-group" aria-label="筛选提醒">
+              <button class="filter-chip is-active" data-filter="all" type="button">全部</button>
+              <button class="filter-chip" data-filter="active" type="button">启用中</button>
+              <button class="filter-chip" data-filter="paused" type="button">已暂停</button>
+            </div>
+            <button class="button button-primary" id="newReminderButton" type="button">
+              <span aria-hidden="true">＋</span> 新建提醒
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>提醒</th>
+                <th>发送到</th>
+                <th>规则与下次时间</th>
+                <th>最近结果</th>
+                <th>状态</th>
+                <th><span class="sr-only">操作</span></th>
+              </tr>
+            </thead>
+            <tbody id="reminderRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel content-panel" id="contentPoolsSection">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">顺序循环 · 成功后推进</p>
+            <h2>内容与消息预览</h2>
+            <p>先录入内容和话术，再设置星期抽取规则；发送前可生成完整预览。</p>
+          </div>
+          <div class="content-actions">
+            <button class="button button-quiet" id="managePoolsButton" type="button">管理内容池</button>
+            <button class="button button-quiet" id="managePhrasePoolsButton" type="button">管理话术池</button>
+            <button class="button button-primary" id="manageRulesButton" type="button">设置星期规则</button>
+          </div>
+        </div>
+        <div class="content-layout">
+          <div class="pool-summary" id="poolSummary"></div>
+          <div class="preview-card">
+            <div class="preview-controls">
+              <label class="field"><span>预览规则</span><select id="previewRuleSelect"></select></label>
+              <label class="field"><span>目标机器人</span><select id="previewRobotSelect"></select></label>
+              <label class="field"><span>星期</span><select id="previewWeekday"><option value="1">星期一</option><option value="2">星期二</option><option value="3">星期三</option><option value="4">星期四</option><option value="5">星期五</option><option value="6">星期六</option><option value="0">星期日</option></select></label>
+              <button class="button button-primary" id="generatePreviewButton" type="button">生成完整预览</button>
+            </div>
+            <div class="message-preview empty-preview" id="messagePreview">
+              <strong>这里会显示整条钉钉消息</strong>
+              <span>预览不会消耗内容，也不会推进 A/B 池位置</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <details class="panel operations-panel collapsible-panel" id="operationsSection">
+        <summary class="panel-heading operations-heading">
+          <div>
+            <p class="eyebrow">后台与排期</p>
+            <h2>运行检查</h2>
+            <p>需要排查时再展开，查看后台、机器人和未来 7 天安排。</p>
+          </div>
+          <span class="collapsible-meta"><span class="operations-status is-loading" id="operationsStatus">正在检查…</span><i aria-hidden="true"></i></span>
+        </summary>
+        <div class="operations-layout">
+          <section class="health-board" aria-labelledby="healthTitle">
+            <div class="operations-subheading"><div><strong id="healthTitle">发送前检查</strong><small id="healthSummary">正在读取运行状态</small></div><span class="health-score" id="healthScore">…</span></div>
+            <div class="health-checks" id="healthChecks"></div>
+          </section>
+          <section class="week-board" aria-labelledby="weekTitle">
+            <div class="operations-subheading"><div><strong id="weekTitle">未来 7 天</strong><small>点击日期可查看、调整或新建提醒</small></div><span class="week-total" id="weekTotal">0 条</span></div>
+            <div class="week-plan" id="weekPlan"></div>
+          </section>
+        </div>
+      </details>
+
+      <section class="lower-grid">
+        <details class="panel history-panel collapsible-panel" id="historySection">
+          <summary class="panel-heading compact">
+            <div>
+              <h2>最近发送</h2>
+              <p>默认收起，需要回查时再展开</p>
+            </div>
+            <span class="collapsible-meta"><span>展开最近记录</span><i aria-hidden="true"></i></span>
+          </summary>
+          <ol class="history-list" id="historyList"></ol>
+          <div class="history-footer"><button class="text-button" id="viewAllHistoryButton" type="button">查看全部发送记录</button></div>
+        </details>
+
+        <aside class="panel safety-card">
+          <span class="shield" aria-hidden="true">安</span>
+          <div>
+            <h2>Webhook 已在本机加密</h2>
+            <p>页面只显示末尾少量字符，日志不会记录完整地址。</p>
+          </div>
+        </aside>
+      </section>
+      </main>
+    </div>
+
+    <dialog class="dialog" id="reminderDialog" aria-label="新建或编辑提醒">
+      <form method="dialog" id="reminderForm">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">创建任务</p><h2>新建提醒</h2></div>
+        <button class="icon-button" value="cancel" aria-label="关闭" type="submit" formnovalidate>×</button>
+        </div>
+
+        <div class="form-grid">
+          <label class="field full"><span>提醒名称</span><input name="name" required placeholder="例如：每日下午数据提醒" /></label>
+          <label class="field full"><span>发送到</span><select name="robotId" required></select></label>
+          <fieldset class="field full segmented-field">
+            <legend>消息来源</legend>
+            <div class="segmented" id="messageSourceType">
+              <label><input type="radio" name="sourceType" value="fixed" checked /><span>固定消息</span></label>
+              <label><input type="radio" name="sourceType" value="pool_rule" /><span>内容池规则</span></label>
+            </div>
+          </fieldset>
+          <label class="field full" id="fixedMessageField"><span>消息内容</span><textarea name="message" rows="5" placeholder="填写要发送的内容，安全关键词会自动加入"></textarea><small>发送时会自动在开头加入机器人安全关键词</small></label>
+          <label class="field full is-hidden" id="contentRuleField"><span>内容池规则</span><select name="contentRuleId"></select><small>到点后按照当天星期抽取 A/B 内容和三套顺序话术</small></label>
+          <fieldset class="field full segmented-field">
+            <legend>消息样式</legend>
+            <div class="segmented" id="messageFormatType">
+              <label><input type="radio" name="messageFormat" value="text" checked /><span>普通文本（推荐）</span></label>
+              <label><input type="radio" name="messageFormat" value="markdown" /><span>Markdown 排版</span></label>
+            </div>
+            <small>普通文本兼容性最好；Markdown 可使用标题、粗体和列表，旧提醒不会自动改变。</small>
+          </fieldset>
+          <label class="field full is-hidden" id="messageTitleField"><span>Markdown 标题</span><input name="messageTitle" maxlength="100" placeholder="例如：每日风险提醒" /><small>这是钉钉消息的摘要标题，正文仍使用上方消息或内容池。</small></label>
+          <div class="field full variable-guide">
+            <span>可用变量（点击插入到固定消息）</span>
+            <div class="variable-chips">
+              <button type="button" data-message-variable="{日期}">{日期}</button>
+              <button type="button" data-message-variable="{星期}">{星期}</button>
+              <button type="button" data-message-variable="{时间}">{时间}</button>
+              <button type="button" data-message-variable="{机器人}">{机器人}</button>
+              <button type="button" data-message-variable="{提醒名称}">{提醒名称}</button>
+            </div>
+            <small>例如“{日期}请完成检查”，发送时会自动替换为实际日期；预览和真实发送使用同一套结果。</small>
+          </div>
+          <div class="field full message-preview-tools">
+            <button class="button button-quiet" id="previewReminderButton" type="button">生成完整发送预览</button>
+            <small>只生成预览，不保存、不推进内容池，也不会联系钉钉。</small>
+          </div>
+          <article class="field full reminder-message-preview is-hidden" id="reminderMessagePreview" aria-live="polite"></article>
+          <fieldset class="field full segmented-field">
+            <legend>重复规则</legend>
+            <div class="segmented" id="scheduleType">
+              <label><input type="radio" name="frequency" value="once" /><span>一次性</span></label>
+              <label><input type="radio" name="frequency" value="daily" checked /><span>每天</span></label>
+              <label><input type="radio" name="frequency" value="weekly" /><span>每周</span></label>
+            </div>
+          </fieldset>
+          <label class="field" id="dateField"><span>发送日期</span><input name="date" type="date" /><small>选择“一次性”时会自动填入最近可用日期，也可以手动修改。</small></label>
+          <label class="field"><span>发送时间</span><input name="time" type="time" value="09:30" required /></label>
+          <label class="field full is-hidden" id="weekdayField"><span>星期</span><select name="weekday"><option value="1">星期一</option><option value="2">星期二</option><option value="3">星期三</option><option value="4">星期四</option><option value="5">星期五</option><option value="6">星期六</option><option value="0">星期日</option></select></label>
+          <input name="calendarMode" id="calendarMode" type="hidden" value="calendar_days" />
+          <input name="monthlyWorkdayN" type="hidden" value="1" />
+          <input name="skipHolidays" type="checkbox" hidden />
+          <fieldset class="field full calendar-rule-box pause-rule-box">
+            <legend>暂停日期（可选）</legend>
+            <label class="field full"><span>指定暂停日期</span><input name="pauseDates" placeholder="例如：2026-10-01, 2026-10-02" /><small>填写后，这条提醒在这些日期不会发送。</small></label>
+            <label class="field full"><span>暂停日期段（可选）</span><input name="pauseRanges" placeholder="例如：2026-10-01~2026-10-07" /></label>
+          </fieldset>
+        </div>
+
+        <div class="option-list">
+          <label><span><strong>@ 所有人</strong><small>发送时提醒群内所有成员</small></span><input type="checkbox" name="atAll" class="switch" /></label>
+          <label><span><strong>立即启用</strong><small>保存后开始等待下一次发送</small></span><input type="checkbox" name="enabled" class="switch" checked /></label>
+          <label><span><strong>错过后补发</strong><small>电脑关机错过时间，开机后补发一次</small></span><input type="checkbox" name="catchUp" class="switch" /></label>
+          <label><span><strong>发送前强制确认预览</strong><small>未确认完整预览时，后台不会真正发送</small></span><input type="checkbox" name="previewConfirmRequired" class="switch" /></label>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel" type="submit" formnovalidate>取消</button>
+          <button class="button button-primary" id="saveReminderButton" value="default" type="submit">保存提醒</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="robotsDialog" aria-label="机器人管理">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">发送目标</p><h2>机器人管理</h2></div>
+        <button class="icon-button" id="closeRobotsButton" aria-label="关闭" type="button">×</button>
+      </div>
+      <div class="robot-list" id="robotList"></div>
+      <details class="add-robot-box" id="robotEditor">
+        <summary id="robotEditorSummary">＋ 添加机器人</summary>
+        <form id="robotForm" autocomplete="off">
+          <input type="hidden" name="id" />
+          <p class="prototype-warning">Webhook 会交给 Windows 当前用户加密，数据库和页面都不会保存或显示明文。发送功能目前仍关闭。</p>
+          <div class="form-grid">
+            <label class="field"><span>机器人名称</span><input name="name" required placeholder="例如：项目 B 群" /></label>
+            <label class="field"><span>安全关键词</span><input name="keyword" required value="定时通知" /></label>
+            <label class="field full"><span>Webhook 地址</span><input name="webhook" type="password" placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." /><small id="webhookHelp">新机器人必须填写；保存后只能看到末尾 4 位。</small></label>
+            <label class="field full"><span>加签密钥（可选）</span><input name="secret" type="password" placeholder="仅加签机器人需要填写" /></label>
+          </div>
+          <div class="inline-actions"><button class="button button-quiet is-hidden" id="cancelRobotEdit" type="button">取消编辑</button><button class="button button-primary" id="saveRobotButton" type="submit">保存机器人</button></div>
+          <p class="form-status is-hidden" id="robotFormStatus" role="status" aria-live="polite"></p>
+        </form>
+      </details>
+    </dialog>
+
+    <dialog class="dialog action-dialog" id="reminderActionsDialog" aria-label="提醒操作">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">提醒操作</p><h2 id="actionReminderName">提醒</h2></div>
+        <button class="icon-button" id="closeActionsButton" aria-label="关闭" type="button">×</button>
+      </div>
+      <div class="action-list">
+        <button type="button" data-reminder-action="edit"><strong>编辑提醒</strong><small>修改内容、时间和发送目标</small></button>
+        <button type="button" data-reminder-action="copy"><strong>复制一份</strong><small>创建一个默认暂停的副本</small></button>
+        <button type="button" data-reminder-action="confirm-preview"><strong>确认完整预览</strong><small>开启强制预览后，确认一次才允许后台发送</small></button>
+        <button class="danger-action" type="button" data-reminder-action="delete"><strong>删除提醒</strong><small>发送历史仍会保留</small></button>
+      </div>
+    </dialog>
+
+    <dialog class="dialog extra-wide-dialog" id="poolsDialog" aria-label="内容池管理">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">内容仓库</p><h2>管理内容池</h2></div>
+        <button class="icon-button" id="closePoolsButton" aria-label="关闭" type="button">×</button>
+      </div>
+      <div class="pool-manager">
+        <aside class="pool-sidebar">
+          <div class="pool-dialog-list" id="poolDialogList"></div>
+          <details class="compact-details">
+            <summary>＋ 新建内容池</summary>
+            <form id="createPoolForm">
+              <label class="field"><span>名称</span><input name="name" required placeholder="例如：A池" /></label>
+              <label class="field"><span>说明</span><input name="description" placeholder="例如：高频风险提醒" /></label>
+              <button class="button button-primary" type="submit">创建</button>
+            </form>
+          </details>
+        </aside>
+        <section class="pool-detail" id="poolDetail">
+          <div class="empty-state"><strong>请选择一个内容池</strong><small>可以先创建 A 池和 B 池</small></div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog class="dialog extra-wide-dialog" id="rulesDialog" aria-label="星期规则设置">
+      <form id="ruleForm">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">每周抽取计划</p><h2>设置星期规则</h2></div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit" formnovalidate>×</button>
+        </div>
+        <div class="rule-editor-head">
+          <label class="field full"><span>正在编辑</span><select name="ruleId" id="ruleEditorSelect"><option value="">＋ 新建规则</option></select></label>
+          <label class="field"><span>规则名称</span><input name="name" required placeholder="例如：每日风险提醒规则" /></label>
+          <label class="field"><span>消息标题</span><input name="messageTitle" required value="每日风险提醒" /></label>
+          <label class="field full"><span>消息排版</span><select name="layoutMode"><option value="compact">紧凑｜基本不留空行</option><option value="balanced">标准｜段落分组，提醒条目连续</option><option value="spacious">宽松｜每部分之间留空行</option></select><small>保存后，预览和真实发送都会使用这里选择的排版。</small></label>
+          <div class="phrase-rule-note full"><strong>称呼、开头话术和结束语将从三套话术池中自动配对</strong><small>每套话术按当前排序依次循环；预览不会消耗话术。</small></div>
+        </div>
+        <div class="weekday-rules">
+          <div class="weekday-rules-title"><strong>每一天从哪里取、取几条</strong><small>第二个池可以留空；同一天也可以两次选择同一个池</small></div>
+          <div id="weekdayRuleRows"></div>
+        </div>
+        <div class="dialog-actions">
+          <button class="button button-danger is-hidden" id="deleteRuleButton" type="button">删除当前规则</button>
+          <button class="button button-quiet" value="cancel" type="submit" formnovalidate>取消</button>
+          <button class="button button-primary" value="default" type="submit">保存星期规则</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog extra-wide-dialog" id="phrasePoolsDialog" aria-label="话术池管理">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">自由排序 · 成功后推进</p><h2>管理三套话术池</h2></div>
+        <button class="icon-button" id="closePhrasePoolsButton" aria-label="关闭" type="button">×</button>
+      </div>
+      <div class="pool-manager">
+        <aside class="pool-sidebar">
+          <div class="pool-dialog-list" id="phrasePoolList"></div>
+          <p class="sidebar-help">三套池按各自顺序循环。每次组合各取一条，发送成功后才推进。</p>
+        </aside>
+        <section class="pool-detail" id="phrasePoolDetail"></section>
+      </div>
+    </dialog>
+
+    <dialog class="dialog extra-wide-dialog" id="handoverDialog" aria-label="交接导入导出与更新">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">换电脑、交给同事、检查新版</p><h2>交接、导入导出与更新</h2></div>
+        <button class="icon-button" id="closeHandoverButton" aria-label="关闭" type="button">×</button>
+      </div>
+      <div class="handover-grid">
+        <section class="handover-card">
+          <div><span class="step-badge">交接包 · 导出</span><h3>把当前配置交给下一位</h3><p>换电脑或换负责人时使用。会打包机器人、提醒、内容池、话术和推进位置，Windows 与 Mac 通用。</p></div>
+          <form id="handoverExportForm">
+            <label class="handover-check"><input name="includeWebhooks" type="checkbox" checked /><span><strong>包含 Webhook 和加签密钥</strong><small>勾选后继任者无需重新粘贴；敏感信息只存在于密码加密的交接文件中。</small></span></label>
+            <label class="field"><span>设置交接密码</span><input name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="至少 8 个字符" /></label>
+            <label class="field"><span>再次输入密码</span><input name="passwordConfirm" type="password" minlength="8" required autocomplete="new-password" /></label>
+            <button class="button button-primary" type="submit">导出 .wensding 文件</button>
+          </form>
+        </section>
+
+        <section class="handover-card">
+          <div><span class="step-badge">交接包 · 导入</span><h3>在新电脑接收配置</h3><p>先读取并核对包内数量，不会立刻修改数据。确认导入后会自动备份，并暂停全部提醒以防重复发送。</p></div>
+          <form id="handoverInspectForm">
+            <label class="field"><span>选择交接文件</span><input name="file" type="file" accept=".wensding,application/json" required /></label>
+            <label class="field"><span>交接密码</span><input name="password" type="password" minlength="8" required autocomplete="current-password" /></label>
+            <button class="button button-quiet" type="submit">读取并预览</button>
+          </form>
+          <div class="handover-preview is-hidden" id="handoverPreview"></div>
+          <button class="button button-primary is-hidden" id="confirmHandoverImportButton" type="button">确认导入并全部暂停</button>
+        </section>
+
+        <section class="handover-card handover-pending is-hidden" id="handoverPendingCard">
+          <div><span class="step-badge warning">待接管</span><h3>配置已导入，当前不会自动发送</h3><p>请先到“机器人管理”逐个完成测试发送，并确认旧电脑已经停止运行，然后再让这台电脑正式接管。</p></div>
+          <button class="button button-primary" id="completeHandoverButton" type="button">我已停止旧电脑，本机正式接管</button>
+        </section>
+
+        <section class="handover-card update-card" id="updateCard">
+          <div><span class="step-badge">程序更新</span><h3>查看当前版本与新版</h3><p>这里只更新程序，不会覆盖机器人、提醒或内容。检测到新版后，会自动选择适合 Windows 或 Mac 的文件。</p></div>
+          <form id="updateConfigForm" class="update-form">
+            <label class="field"><span>GitHub 仓库</span><input name="repository" placeholder="用户名/仓库名" /></label>
+            <div class="inline-actions"><button class="button button-quiet" type="submit">保存并检查更新</button></div>
+          </form>
+          <div class="update-result" id="updateResult"><small>当前版本：<span id="currentVersionLabel">读取中…</span></small></div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="securityDialog" aria-label="发送安全设置">
+      <div class="dialog-heading"><div><p class="eyebrow">发送保护</p><h2>发送安全设置</h2></div><button class="icon-button" id="closeSecurityButton" type="button" aria-label="关闭">×</button></div>
+      <form id="securityForm">
+        <p class="prototype-warning">这里的开关会直接影响后台发送。建议先保持“紧急停止”开启，确认预览和测试都正确后再关闭。</p>
+        <div class="option-list">
+          <label><span><strong>全局紧急停止</strong><small>立即拦截全部正式发送，不删除任务</small></span><input type="checkbox" name="globalEmergencyStop" class="switch" /></label>
+          <label><span><strong>今天暂停全部消息</strong><small>只暂停今天，明天自动恢复</small></span><input type="checkbox" name="pauseToday" class="switch" /></label>
+          <label><span><strong>重复内容检测</strong><small>同一机器人在时间窗口内不重复发送完全相同内容</small></span><input type="checkbox" name="duplicateDetection" class="switch" checked /></label>
+        </div>
+        <div class="form-grid">
+          <label class="field"><span>发送前队列（秒）</span><select name="queueSeconds"><option value="0">不排队</option><option value="60">提前 1 分钟进入队列</option></select></label>
+          <label class="field"><span>重复检测窗口（分钟）</span><input name="duplicateWindowMinutes" type="number" min="1" max="1440" value="60" /></label>
+          <label class="field"><span>同群窗口最多发送次数</span><input name="sameRobotLimit" type="number" min="0" max="100" value="3" /><small>填 0 表示不限制。</small></label>
+          <label class="field"><span>同群统计窗口（分钟）</span><input name="sameRobotWindowMinutes" type="number" min="1" max="1440" value="10" /></label>
+          <label class="field"><span>连续失败自动暂停次数</span><input name="failurePauseThreshold" type="number" min="1" max="20" value="3" /></label>
+        </div>
+        <div class="dialog-actions"><button class="button button-quiet" id="cancelSecurityButton" type="button">取消</button><button class="button button-primary" type="submit">保存安全设置</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="dayPlanDialog" aria-label="当天提醒安排">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">未来 7 天</p><h2 id="dayPlanTitle">当天提醒</h2></div>
+        <button class="icon-button" id="closeDayPlanButton" type="button" aria-label="关闭当天提醒">×</button>
+      </div>
+      <div class="day-plan-detail" id="dayPlanDetail"></div>
+      <div class="dialog-actions">
+        <button class="button button-quiet" id="createReminderForDayButton" type="button">在这一天新建提醒</button>
+        <button class="button button-primary" id="finishDayPlanButton" type="button">完成</button>
+      </div>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="historyDialog" aria-label="完整发送记录">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">发送结果与排错</p><h2>全部发送记录</h2></div>
+        <button class="icon-button" id="closeHistoryButton" type="button" aria-label="关闭发送记录">×</button>
+      </div>
+      <div class="history-dialog-list" id="historyDialogList"></div>
+      <div class="dialog-actions"><button class="button button-primary" id="finishHistoryButton" type="button">完成</button></div>
+    </dialog>
+
+    <dialog class="dialog guide-dialog" id="guideDialog" aria-label="使用指南">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">第一次使用</p><h2>DingDone 使用指南</h2></div>
+        <button class="icon-button" id="closeGuideButton" type="button" aria-label="关闭使用指南">×</button>
+      </div>
+      <div class="guide-body">
+        <section class="guide-start">
+          <h3>三步开始</h3>
+          <ol>
+            <li><span>1</span><div><strong>添加机器人</strong><p>打开顶部“机器人管理”，粘贴 Webhook，填写安全关键词并先测试一次。</p></div></li>
+            <li><span>2</span><div><strong>准备消息</strong><p>固定通知可直接填写；循环提醒先到“内容与预览”录入内容池、话术池和星期规则。</p></div></li>
+            <li><span>3</span><div><strong>新建提醒</strong><p>选择机器人、消息来源和发送时间，生成完整预览后保存，再按需要启用。</p></div></li>
+          </ol>
+        </section>
+        <section class="guide-reference">
+          <h3>常用功能</h3>
+          <dl>
+            <div><dt>全部提醒</dt><dd>编辑、暂停、复制、预览或删除任务。</dd></div>
+            <div><dt>内容与预览</dt><dd>管理 A/B 池、三套话术、抽取顺序和消息全文。</dd></div>
+            <div><dt>运行检查</dt><dd>查看后台状态、未来七天排期及待处理问题。</dd></div>
+            <div><dt>发送安全</dt><dd>紧急停止、当天暂停、限流和失败自动暂停。</dd></div>
+            <div><dt>交接 / 导入导出</dt><dd>把配置加密导出，在另一台 Windows 或 Mac 导入接管。</dd></div>
+          </dl>
+        </section>
+        <aside class="guide-note">
+          <strong>请记住</strong>
+          <p>电脑需要保持开机并联网；网页可以关闭，但本地后台必须运行。启用“真实发送”前，请先预览并完成机器人测试。</p>
+        </aside>
+      </div>
+      <div class="dialog-actions"><button class="button button-primary" id="finishGuideButton" type="button">知道了</button></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
